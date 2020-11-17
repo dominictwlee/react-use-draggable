@@ -24,20 +24,12 @@ export default function useDraggable<T extends HTMLElement>() {
         return {
           deltaX: 0,
           deltaY: 0,
-          lastX: x,
-          lastY: y,
-          x,
-          y,
         };
       }
 
       return {
         deltaX: x - lastX,
         deltaY: y - lastY,
-        lastX,
-        lastY,
-        x,
-        y,
       };
     },
     [lastX, lastY]
