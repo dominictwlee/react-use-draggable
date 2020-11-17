@@ -18,7 +18,7 @@ export default function useDraggable<T extends HTMLElement>() {
   const [lastY, setLastY] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState>(DragState.IDLE);
 
-  const calcCoordsData = useCallback(
+  const calcDragDelta = useCallback(
     (x: number, y: number) => {
       if (lastX === null || lastY === null) {
         return {
@@ -40,11 +40,11 @@ export default function useDraggable<T extends HTMLElement>() {
       if (dragState !== DragState.DRAGGING) {
         return;
       }
-      const { deltaX, deltaY } = calcCoordsData(e.clientX, e.clientY);
+      const { deltaX, deltaY } = calcDragDelta(e.clientX, e.clientY);
       setTranslateX(lastTranslateX.current + deltaX);
       setTranslateY(lastTranslateY.current + deltaY);
     },
-    [calcCoordsData, dragState]
+    [calcDragDelta, dragState]
   );
 
   const handleDragEnd = useCallback(() => {
