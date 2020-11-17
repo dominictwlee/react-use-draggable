@@ -7,12 +7,13 @@ enum DragState {
   DRAGGING = 'dragging',
 }
 
-function calcCoordsData() {}
-
 export default function useDraggable<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [translateX, setTranslateX] = useState(0);
   const [translateY, setTranslateY] = useState(0);
+  const lastTranslateX = useRef(0);
+  const lastTranslateY = useRef(0);
+
   const [lastX, setLastX] = useState<number | null>(null);
   const [lastY, setLastY] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState>(DragState.IDLE);
@@ -48,13 +49,20 @@ export default function useDraggable<T extends HTMLElement>() {
         return;
       }
       const { deltaX, deltaY } = calcCoordsData(e.clientX, e.clientY);
-      setTranslateX(deltaX);
-      setTranslateY(deltaY);
+      setTranslateX(lastTranslateX.current + deltaX);
+      setTranslateY(lastTranslateY.current + deltaY);
     },
     [calcCoordsData, dragState]
   );
 
-  const handleDragEnd = () => {};
+  const handleDragEnd = useCallback(() => {
+    if (dragState !== DragState.DRAGGING) {
+      return;
+    }
+    setDragState(DragState.IDLE);
+    lastTranslateX.current = translateX;
+    lastTranslateY.current = translateY;
+  }, [dragState, translateX, translateY]);
 
   useEffect(() => {
     const node = ref.current;
@@ -88,6 +96,7 @@ export default function useDraggable<T extends HTMLElement>() {
   return {
     ref,
     onMouseDown: handleDragStart,
+    onMouseUp: handleDragEnd,
     style: { transform: `translate(${translateX}px, ${translateY}px)` },
   };
 }
