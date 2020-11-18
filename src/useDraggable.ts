@@ -21,6 +21,25 @@ export default function useDraggable<T extends HTMLElement>() {
   const [lastY, setLastY] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState>(DragState.IDLE);
 
+  React.useEffect(() => {
+    function preventBehavior(e: TouchEvent) {
+      e.preventDefault();
+    }
+    if (dragState === DragState.DRAGGING) {
+      document.addEventListener('touchstart', preventBehavior, {
+        passive: false,
+      });
+      document.addEventListener('touchmove', preventBehavior, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      document.removeEventListener('touchstart', preventBehavior);
+      document.removeEventListener('touchmove', preventBehavior);
+    };
+  }, [dragState]);
+
   const calcDragDelta = useCallback(
     (x: number, y: number) => {
       if (lastX === null || lastY === null) {
@@ -78,22 +97,21 @@ export default function useDraggable<T extends HTMLElement>() {
   }, [dragState, translateX, translateY]);
 
   useEffect(() => {
-    const node = ref.current;
     if (dragState === DragState.DRAGGING) {
       switch (eventType.current) {
         case 'mouse':
-          node?.ownerDocument.addEventListener('mousemove', handleMouseDrag);
+          document.addEventListener('mousemove', handleMouseDrag);
           break;
         case 'touch':
-          node?.ownerDocument.addEventListener('touchmove', handleTouchDrag);
+          document.addEventListener('touchmove', handleTouchDrag);
           break;
         default:
           break;
       }
     }
     return () => {
-      node?.ownerDocument.removeEventListener('mousemove', handleMouseDrag);
-      node?.ownerDocument.removeEventListener('touchmove', handleTouchDrag);
+      document.removeEventListener('mousemove', handleMouseDrag);
+      document.removeEventListener('touchmove', handleTouchDrag);
     };
   }, [dragState, handleDrag, handleMouseDrag, handleTouchDrag]);
 
