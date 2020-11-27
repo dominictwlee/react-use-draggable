@@ -162,6 +162,9 @@ export default function useDraggable<T extends HTMLElement>() {
     onTouchStart,
     onMouseUp: handleDragEnd,
     onTouchEnd: handleDragEnd,
-    style: { transform: `translate(${translateX}px, ${translateY}px)` },
+    style: {
+      transform: `translate(${translateX}px, ${translateY}px)`,
+      userSelect: dragState === DragState.DRAGGING && 'none',
+    },
   };
 }
